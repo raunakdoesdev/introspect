@@ -24,8 +24,11 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Open Bud</title>
-        <meta name="description" content="Open source rosebud clone." />
+        <title>Introspect</title>
+        <meta
+          name="description"
+          content="Open source AI powered journaling for introspection."
+        />
       </Head>
       <Layout className="flex flex-col space-y-4">
         <Card>
