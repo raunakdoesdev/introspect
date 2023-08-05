@@ -17,9 +17,10 @@ export const env = createEnv({
       (str) => process.env.VERCEL_URL ?? str,
       process.env.VERCEL ? z.string().min(1) : z.string().url()
     ),
-    GOOGLE_CLIENT_ID: z.string(),
-    GOOGLE_CLIENT_SECRET: z.string(),
+    NOTION_CLIENT_ID: z.string(),
+    NOTION_CLIENT_SECRET: z.string(),
     ANTHROPIC_API_KEY: z.string(),
+    HELICONE_API_KEY: z.string(),
   },
 
   /**
@@ -40,9 +41,10 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    NOTION_CLIENT_ID: process.env.NOTION_CLIENT_ID,
+    NOTION_CLIENT_SECRET: process.env.NOTION_CLIENT_SECRET,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+    HELICONE_API_KEY: process.env.HELICONE_API_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.

@@ -5,9 +5,10 @@ import {
   type NextAuthOptions,
   type DefaultSession,
 } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+
 import { env } from "~/env.mjs";
 import { prisma } from "~/server/db";
+import NotionProvider from "~/server/notion";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -35,6 +36,7 @@ declare module "next-auth" {
  *
  * @see https://next-auth.js.org/configuration/options
  */
+
 export const authOptions: NextAuthOptions = {
   callbacks: {
     session: ({ session, user }) => ({
@@ -47,9 +49,10 @@ export const authOptions: NextAuthOptions = {
   },
   adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
+    NotionProvider({
+      clientId: env.NOTION_CLIENT_ID,
+      clientSecret: env.NOTION_CLIENT_SECRET,
+      redirectUri: `${env.NEXTAUTH_URL}/api/auth/callback/notion`,
     }),
   ],
 };
