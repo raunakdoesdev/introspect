@@ -22,6 +22,7 @@ export default function Layout({
           content="Open source AI powered journaling for introspection."
         />
         <link rel="icon" href="/favicon.png" />
+        <link rel="apple-touch-icon" sizes="128x128" href="/favicon.png"></link>
       </Head>
       <main
         className={cn(
