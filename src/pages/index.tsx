@@ -20,6 +20,7 @@ export default function Home() {
           name="description"
           content="Open source AI powered journaling for introspection."
         />
+        <link rel="icon" href="/favicon.png" />
       </Head>
       <Layout className="flex flex-col space-y-4">
         <ul className="flex flex-row space-x-5">

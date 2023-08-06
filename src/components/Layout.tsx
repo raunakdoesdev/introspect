@@ -1,4 +1,5 @@
 import { useSession } from "next-auth/react";
+import Head from "next/head";
 import Navbar from "~/components/Navbar";
 import { cn } from "~/lib/utils";
 
@@ -13,14 +14,24 @@ export default function Layout({
 }) {
   useSession({ required: true });
   return (
-    <main
-      className={cn(
-        "mx-auto w-screen max-w-md p-4 md:p-0 md:py-8 lg:max-w-lg xl:max-w-xl",
-        className
-      )}
-    >
-      {!hideNav && <Navbar />}
-      {children}
-    </main>
+    <>
+      <Head>
+        <title>Introspect</title>
+        <meta
+          name="description"
+          content="Open source AI powered journaling for introspection."
+        />
+        <link rel="icon" href="/favicon.png" />
+      </Head>
+      <main
+        className={cn(
+          "mx-auto w-screen max-w-md p-4 md:p-0 md:py-8 lg:max-w-lg xl:max-w-xl",
+          className
+        )}
+      >
+        {!hideNav && <Navbar />}
+        {children}
+      </main>
+    </>
   );
 }
