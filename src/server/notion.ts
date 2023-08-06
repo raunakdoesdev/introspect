@@ -86,7 +86,7 @@ export default function NotionProvider<P extends NotionProfile>(
         client_id: options.clientId,
         response_type: "code",
         owner: "user",
-        redirect_uri: options.redirectUri,
+        // redirect_uri: options.redirectUri,
       },
       url: `${NOTION_HOST}/v1/oauth/authorize`,
     },
