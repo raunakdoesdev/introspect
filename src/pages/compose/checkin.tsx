@@ -141,7 +141,6 @@ export default function Checkin() {
                           });
                         })
                         .catch(console.error);
-                      setConversationIdx(conversationIdx + 1);
                     }}
                   >
                     {saveJournal.isLoading ? (

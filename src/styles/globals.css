@@ -6,6 +6,14 @@ body {
   background-color: var(--wallpaper);
 }
 
+.notion-to-do-item {
+  @apply flex flex-row items-center space-x-2;
+}
+
+.notion-blue {
+  @apply text-muted-foreground;
+}
+
 @layer base {
   :root {
     --wallpaper: #fffff;

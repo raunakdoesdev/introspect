@@ -15,7 +15,7 @@ export default function Layout({
   return (
     <main
       className={cn(
-        "mx-auto h-screen w-screen max-w-md p-4 md:p-0 md:pt-8",
+        "mx-auto w-screen max-w-md p-4 md:p-0 md:py-8 lg:max-w-lg xl:max-w-xl",
         className
       )}
     >

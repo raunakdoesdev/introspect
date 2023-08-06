@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import Link from "next/link";
-import React from "react";
+import { NotionRenderer, PageIcon, Text } from "react-notion-x";
 import Layout from "~/components/Layout";
 import {
   Card,
@@ -7,12 +8,14 @@ import {
   CardDescription,
   CardHeader,
 } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import type { JournalEntry } from "~/server/api/routers/journal";
+import { cn } from "~/lib/utils";
+import type { JournalEntryNotion } from "~/server/api/routers/journal";
 import { api } from "~/utils/api";
 
-function Entry({ entry }: { entry: JournalEntry }) {
+function Entry({ entry }: { entry: JournalEntryNotion }) {
   return (
     <Tabs defaultValue="summary" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
@@ -39,13 +42,30 @@ function Entry({ entry }: { entry: JournalEntry }) {
       </TabsContent>
       <TabsContent value="entry">
         <Card>
-          <CardHeader className="flex flex-col space-y-2">
-            {entry.conversation.map((message, idx) => (
-              <React.Fragment key={idx}>
-                <p className="text-muted-foreground">{message.question}</p>
-                <p>{message.answer}</p>
-              </React.Fragment>
-            ))}
+          <CardHeader className="flex flex-col space-y-2 whitespace-pre-line">
+            <NotionRenderer
+              recordMap={entry.recordMap}
+              components={{
+                Checkbox: ({ isChecked }) => <Checkbox checked={isChecked} />,
+                Callout: ({ blockId, block }: { blockId: any; block: any }) =>
+                  block.format.page_icon === "🤖" ? null : (
+                    <div
+                      className={cn(
+                        "notion-callout",
+                        block.format?.block_color &&
+                          `notion-${block.format?.block_color}_co`,
+                        blockId
+                      )}
+                    >
+                      <PageIcon block={block} />
+
+                      <div className="notion-callout-text">
+                        <Text value={block.properties?.title} block={block} />
+                      </div>
+                    </div>
+                  ),
+              }}
+            />
           </CardHeader>
         </Card>
       </TabsContent>

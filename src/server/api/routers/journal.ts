@@ -1,12 +1,17 @@
 import { Client } from "@notionhq/client";
 import type {
   BlockObjectRequest,
+  BlockObjectResponse,
   DatabaseObjectResponse,
+  PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints";
 import { z } from "zod";
 import { Conversation } from "~/pages/compose/checkin";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
+// @ts-expect-error - no types
+import { NotionCompatAPI } from "notion-compat";
+import { NotionAPI } from "notion-client";
 
 export const JournalEntry = z.object({
   time: z.string().optional(),
@@ -18,6 +23,10 @@ export const JournalEntry = z.object({
   conversation: Conversation,
 });
 export type JournalEntry = z.infer<typeof JournalEntry>;
+
+export type JournalEntryNotion = Omit<JournalEntry, "conversation"> & {
+  recordMap: any;
+};
 
 export const journalRouter = createTRPCRouter({
   getDatabaseId: protectedProcedure.query(async ({ ctx }) => {
@@ -91,19 +100,65 @@ export const journalRouter = createTRPCRouter({
       })
     ).results;
 
-    return pages
-      .map((page: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const json = page.properties.JSON.rich_text[0]?.text?.content;
-        if (json) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const parsed = JournalEntry.safeParse(JSON.parse(json));
-          if (parsed.success) {
-            return parsed.data;
-          }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const notionClient = new NotionCompatAPI(notion) as any as NotionAPI;
+
+    return await Promise.all(
+      (pages as PageObjectResponse[]).map(async (page) => {
+        // get blocks from this page
+
+        let blocks = (
+          await notion.blocks.children.list({
+            block_id: page.id,
+          })
+        ).results as BlockObjectResponse[];
+
+        let summaryContent = "No summary is available";
+        const conversation: Conversation = [];
+
+        if (blocks[0] && blocks[0].type === "callout") {
+          summaryContent = blocks[0].callout.rich_text[0]!.plain_text;
+          blocks = blocks.slice(1);
         }
+
+        blocks
+          .filter((block) => block.type === "paragraph")
+          .forEach((block) => {
+            if (block.type !== "paragraph") return;
+
+            let q = "";
+            let a = "";
+
+            block.paragraph.rich_text.forEach((text) => {
+              if (text.annotations.color === "blue") {
+                q += text.plain_text;
+              } else {
+                a += text.plain_text;
+              }
+            });
+            // strip leading and trailing newlines
+            q = q.replace(/^\n+|\n+$/g, "");
+            a = a.replace(/^\n+|\n+$/g, "");
+            conversation.push({ question: q, answer: a });
+          });
+
+        if (!page.properties.Name || page.properties.Name.type !== "title") {
+          return null;
+        }
+
+        const entry = {
+          time: page.created_time,
+          summary: {
+            emoji: page?.icon?.type === "emoji" ? page.icon.emoji : "",
+            title: page.properties.Name.title[0]!.plain_text,
+            content: summaryContent,
+          },
+          recordMap: await notionClient.getPage(page.id),
+        };
+
+        return entry;
       })
-      .filter(Boolean);
+    );
   }),
   saveJournalEntry: protectedProcedure
     .input(JournalEntry)
@@ -136,16 +191,6 @@ export const journalRouter = createTRPCRouter({
                 type: "text",
                 text: {
                   content: input.summary.title,
-                },
-              },
-            ],
-          },
-          JSON: {
-            rich_text: [
-              {
-                type: "text",
-                text: {
-                  content: JSON.stringify(input),
                 },
               },
             ],
