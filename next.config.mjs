@@ -20,8 +20,8 @@ const config = {
   },
   // modularizeImports: {
   //   "lucide-react": {
-  //     transform: "lucide-react/{{member}}",
-  //     skipDefaultConversion: true,
+  //     // transform: "lucide-react/{{member}}",
+  //     // skipDefaultConversion: true,
   //     preventFullImport: true,
   //   },
   // },
