@@ -18,6 +18,12 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  modularizeImports: {
+    "lucide-react": {
+      transform: "lucide-react/dist/esm/icons/{{lowerCase kebabCase member}}",
+      skipDefaultConversion: true,
+    },
+  },
 };
 
 export default config;
