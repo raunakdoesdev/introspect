@@ -8,14 +8,6 @@ import { Textarea } from "~/components/ui/textarea";
 import { z } from "zod";
 import { useSession, signIn, signOut } from "next-auth/react";
 
-const Conversation = z.array(
-  z.object({
-    question: z.string(),
-    answer: z.string().optional(),
-  })
-);
-type Conversation = z.infer<typeof Conversation>;
-
 const SYSTEM_PROMPT =
   "You are an expert AI therapist. You are assisting the user, in their journaling behaviors. You will ask them questions that will help them dive deeper and understand themselves better.";
 
@@ -33,10 +25,6 @@ export default function Home() {
 
   const [conversationIdx, setConversationIdx] = useState(0);
   const ref = useRef<HTMLTextAreaElement>(null);
-
-  const { completion, complete } = useCompletion({
-    api: "/api/completion",
-  });
 
   useEffect(() => {
     if (ref.current) {

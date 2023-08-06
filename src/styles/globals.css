@@ -2,27 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-color: var(--wallpaper);
+}
+
 @layer base {
   :root {
-    --background: hsl(0, 0%, 100%);
+    --wallpaper: #fffff;
+    --background: hsl(78.3, 92%, 100%);
     --foreground: hsl(222.2, 84%, 4.9%);
 
-    --muted: hsl(210, 40%, 96.1%);
-    --muted-foreground: hsl(215.4, 16.3%, 46.9%);
+    --muted: #faedcd;
+    --muted-foreground: #70563d;
 
     --popover: hsl(0, 0%, 100%);
     --popover-foreground: hsl(222.2, 84%, 4.9%);
 
-    --card: hsl(0, 0%, 100%);
+    --card: #fffefb;
     --card-foreground: hsl(222.2, 84%, 4.9%);
 
-    --border: hsl(214.3, 31.8%, 91.4%);
-    --input: hsl(214.3, 31.8%, 91.4%);
+    --border: #faedcd;
+    --input: #faedcd;
 
-    --primary: hsl(84.8, 85.2%, 34.5%);
+    --primary: #a2ab87;
     --primary-foreground: hsl(210, 40%, 98%);
 
-    --secondary: hsl(210, 40%, 96.1%);
+    --secondary: #fffefb;
     --secondary-foreground: hsl(222.2, 47.4%, 11.2%);
 
     --accent: hsl(210, 40%, 96.1%);
@@ -31,7 +36,7 @@
     --destructive: hsl(0, 84.2%, 60.2%);
     --destructive-foreground: hsl(210, 40%, 98%);
 
-    --ring: hsl(215, 20.2%, 65.1%);
+    --ring: #faedcd;
 
     --radius: 0.5rem;
   }
@@ -52,11 +57,11 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: hsl(210 40% 98%);
+    --primary-foreground: hsl(222.2 47.4% 11.2%);
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: hsl(217.2 32.6% 17.5%);
+    --secondary-foreground: hsl(210 40% 98%);
 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;

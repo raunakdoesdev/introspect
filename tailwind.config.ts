@@ -17,6 +17,7 @@ module.exports = {
     },
     extend: {
       colors: {
+        wallpaper: "var(--wallpaper)",
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",

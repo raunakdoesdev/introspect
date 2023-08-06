@@ -1,24 +1,15 @@
-import { ArrowRight, MessageSquare } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Head from "next/head";
+import Link from "next/link";
 import Layout from "~/components/Layout";
-import { Button } from "~/components/ui/button";
-import Navbar from "~/components/Navbar";
+import { buttonVariants } from "~/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "~/components/ui/card";
-import {
-  NavigationMenu,
-  NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "~/components/ui/navigation-menu";
-import {
-  NavigationMenuItem,
-  NavigationMenuLink,
-} from "@radix-ui/react-navigation-menu";
-import Link from "next/link";
+import { cn } from "../lib/utils";
 
 export default function Home() {
   return (
@@ -31,6 +22,14 @@ export default function Home() {
         />
       </Head>
       <Layout className="flex flex-col space-y-4">
+        <ul className="flex flex-row space-x-5">
+          <li className="underline-offset-3 font-medium underline underline-offset-4">
+            Home
+          </li>
+          <Link href="/entries">
+            <li>Entries</li>
+          </Link>
+        </ul>
         <Card>
           <CardHeader className="text-sm uppercase text-muted-foreground">
             Daily Reflection
@@ -40,10 +39,11 @@ export default function Home() {
             streak going!
           </CardContent>
           <CardFooter>
-            <Link href="/compose/checkin" className="w-full">
-              <Button className="w-full">
-                Check In <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+            <Link
+              className={cn(buttonVariants({ variant: "default" }), "w-full")}
+              href="/compose/checkin"
+            >
+              Check In <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </CardFooter>
         </Card>
