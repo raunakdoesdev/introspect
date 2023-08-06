@@ -52,7 +52,11 @@ export const authOptions: NextAuthOptions = {
     NotionProvider({
       clientId: env.NOTION_CLIENT_ID,
       clientSecret: env.NOTION_CLIENT_SECRET,
-      redirectUri: `${env.NEXTAUTH_URL}/api/auth/callback/notion`,
+      redirectUri: `${
+        env.NODE_ENV === "development"
+          ? env.NEXTAUTH_URL
+          : "https://introspect.so"
+      }/api/auth/callback/notion`,
     }),
   ],
 };
