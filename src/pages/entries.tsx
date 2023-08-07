@@ -72,7 +72,10 @@ function Entry({ entry }: { entry: JournalEntryNotion }) {
               <Card className="mt-4">
                 <CardHeader className="font-medium">Key Insight</CardHeader>
                 <CardContent>{insight ?? completion ?? ""}</CardContent>
-                {completion && insight !== completion && !isLoading ? (
+                {!saveInsight.isSuccess &&
+                completion &&
+                insight !== completion &&
+                !isLoading ? (
                   <CardFooter>
                     <Button
                       className="w-full"
