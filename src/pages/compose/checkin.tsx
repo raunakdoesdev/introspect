@@ -2,6 +2,7 @@ import { ChevronLeft, Loader2Icon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Layout from "~/components/Layout";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { api } from "~/utils/api";
@@ -26,6 +27,8 @@ export const Conversation = z.array(
 export type Conversation = z.infer<typeof Conversation>;
 
 export default function Checkin() {
+  const searchParams = useSearchParams();
+
   const router = useRouter();
   const saveJournal = api.journal.saveJournalEntry.useMutation({
     onSuccess: () => {
@@ -33,14 +36,24 @@ export default function Checkin() {
     },
   });
 
-  const [conversation, setConversation] = useState<Conversation>([
-    {
-      question: "🌹 What was the highlight of your day?",
-    },
-    {
-      question: "🥀 What's something that didn't go as well today?",
-    },
-  ]);
+  const [conversation, setConversation] = useState<Conversation>(
+    searchParams.get("mode") === "review"
+      ? [
+          {
+            question: "🌹 What was the highlight of your day?",
+          },
+          {
+            question: "🥀 What's something that didn't go as well today?",
+          },
+        ]
+      : [
+          {
+            question: "What's on your mind?",
+          },
+        ]
+  );
+
+  const numInitialQuestions = searchParams.get("mode") === "review" ? 2 : 1;
 
   const { completion, complete, isLoading } = useCompletion({
     api: "/api/completion",
@@ -70,7 +83,7 @@ export default function Checkin() {
         <CardContent className="flex flex-col space-y-4">
           {conversation.slice(0, conversationIdx + 1).map((item, idx) => (
             <>
-              {idx > 1 ? (
+              {idx > numInitialQuestions - 1 ? (
                 <p className="text-sm font-light leading-5">{item.question}</p>
               ) : (
                 <Label htmlFor={`question${idx}`}>{item.question}</Label>
@@ -91,7 +104,9 @@ export default function Checkin() {
                     : undefined
                 }
               />
-              {conversationIdx === idx && item.answer && idx < 1 ? (
+              {conversationIdx === idx &&
+              item.answer &&
+              idx < numInitialQuestions - 1 ? (
                 <Button
                   onClick={() => {
                     setConversationIdx(conversationIdx + 1);
@@ -102,7 +117,7 @@ export default function Checkin() {
               ) : null}
               {conversationIdx === idx &&
               item.answer &&
-              idx >= 1 &&
+              idx >= numInitialQuestions - 1 &&
               !isLoading ? (
                 <div className="flex flex-row justify-between">
                   <Button

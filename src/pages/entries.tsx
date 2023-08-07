@@ -43,17 +43,19 @@ function Entry({ entry }: { entry: JournalEntryNotion }) {
               <span>
                 {entry.summary.emoji} {entry.summary.title}
               </span>
-              <Button
-                size={"sm"}
-                onClick={() => {
-                  const prompt = extractInsightPrompt(entry);
-                  complete(prompt.user, {
-                    body: prompt,
-                  }).catch(console.error);
-                }}
-              >
-                <Wand2 className="h-4 w-4" />
-              </Button>
+              {insight ?? completion ? null : (
+                <Button
+                  size={"sm"}
+                  onClick={() => {
+                    const prompt = extractInsightPrompt(entry);
+                    complete(prompt.user, {
+                      body: prompt,
+                    }).catch(console.error);
+                  }}
+                >
+                  <Wand2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
             {entry.time ? (
               <CardDescription>
