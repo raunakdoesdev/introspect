@@ -87,7 +87,10 @@ function extractPlainText(data: any) {
 
 /** Extract insight */
 export function extractInsightPrompt(conversaton: JournalEntryNotion): Prompt {
-  const builder = new Builder();
+  const builder = new Builder({
+    headless: true,
+    rootName: "instruction",
+  });
   return {
     user: builder.buildObject({
       journal: extractPlainText(conversaton),
