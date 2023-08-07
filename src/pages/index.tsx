@@ -14,14 +14,6 @@ import { cn } from "../lib/utils";
 export default function Home() {
   return (
     <>
-      <Head>
-        <title>Introspect</title>
-        <meta
-          name="description"
-          content="Open source AI powered journaling for introspection."
-        />
-        <link rel="icon" href="/favicon.png" />
-      </Head>
       <Layout className="flex flex-col space-y-4">
         <ul className="flex flex-row space-x-5">
           <li className="underline-offset-3 font-medium underline underline-offset-4">
@@ -33,7 +25,7 @@ export default function Home() {
         </ul>
         <Card>
           <CardHeader className="text-sm uppercase text-muted-foreground">
-            Daily Reflection
+            Evening Reflection
           </CardHeader>
           <CardContent>
             How was your day? Take a moment to reflect on your day and keep your

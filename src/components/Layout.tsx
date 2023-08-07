@@ -23,6 +23,7 @@ export default function Layout({
         />
         <link rel="icon" href="/favicon.png" />
         <link rel="apple-touch-icon" sizes="128x128" href="/favicon.png"></link>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
       </Head>
       <main
         className={cn(
