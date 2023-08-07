@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { Loader2, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { NotionRenderer, PageIcon, Text } from "react-notion-x";
 import Layout from "~/components/Layout";
+import { Button } from "~/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
 } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -14,8 +17,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn } from "~/lib/utils";
 import type { JournalEntryNotion } from "~/server/api/routers/journal";
 import { api } from "~/utils/api";
+import { useCompletion } from "ai/react";
+import { extractInsightPrompt } from "~/utils/prompt";
 
 function Entry({ entry }: { entry: JournalEntryNotion }) {
+  const { complete, completion, isLoading } = useCompletion({
+    api: "/api/completion",
+  });
+
+  const saveInsight = api.journal.saveEntryInsight.useMutation();
+
+  const insight =
+    entry.recordMap.raw?.page?.properties?.Insight?.rich_text[0]?.text.content;
+
   return (
     <Tabs defaultValue="summary" className="w-full">
       <TabsList className="grid w-full grid-cols-2">
@@ -25,7 +39,22 @@ function Entry({ entry }: { entry: JournalEntryNotion }) {
       <TabsContent value="summary">
         <Card>
           <CardHeader className="text-lg font-semibold">
-            {entry.summary.emoji} {entry.summary.title}
+            <div className="flex flex-row justify-between">
+              <span>
+                {entry.summary.emoji} {entry.summary.title}
+              </span>
+              <Button
+                size={"sm"}
+                onClick={() => {
+                  const prompt = extractInsightPrompt(entry);
+                  complete(prompt.user, {
+                    body: prompt,
+                  }).catch(console.error);
+                }}
+              >
+                <Wand2 className="h-4 w-4" />
+              </Button>
+            </div>
             {entry.time ? (
               <CardDescription>
                 {new Date(entry.time).toLocaleString("en-US", {
@@ -37,7 +66,34 @@ function Entry({ entry }: { entry: JournalEntryNotion }) {
               </CardDescription>
             ) : null}
           </CardHeader>
-          <CardContent>{entry.summary.content}</CardContent>
+          <CardContent>
+            {entry.summary.content}
+            {insight ?? completion ? (
+              <Card className="mt-4">
+                <CardHeader className="font-medium">Key Insight</CardHeader>
+                <CardContent>{insight ?? completion ?? ""}</CardContent>
+                {completion && insight !== completion && !isLoading ? (
+                  <CardFooter>
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        console.log(entry.recordMap.raw.page.id);
+                        saveInsight.mutate({
+                          id: entry.recordMap.raw.page.id,
+                          insight: completion,
+                        });
+                      }}
+                    >
+                      {saveInsight.isLoading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : null}
+                      Save Insight
+                    </Button>
+                  </CardFooter>
+                ) : null}
+              </Card>
+            ) : null}
+          </CardContent>
         </Card>
       </TabsContent>
       <TabsContent value="entry">

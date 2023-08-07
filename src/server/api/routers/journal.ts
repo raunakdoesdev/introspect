@@ -9,9 +9,9 @@ import { z } from "zod";
 import { Conversation } from "~/pages/compose/checkin";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
+import type { NotionAPI } from "notion-client";
 // @ts-expect-error - no types
 import { NotionCompatAPI } from "notion-compat";
-import { NotionAPI } from "notion-client";
 
 export const JournalEntry = z.object({
   time: z.string().optional(),
@@ -160,6 +160,60 @@ export const journalRouter = createTRPCRouter({
       })
     );
   }),
+  saveEntryInsight: protectedProcedure
+    .input(z.object({ id: z.string(), insight: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const notionAccount = await prisma.account.findFirstOrThrow({
+        where: {
+          userId: ctx.session.user.id,
+        },
+      });
+      const notion = new Client({
+        auth: notionAccount.access_token!,
+      });
+      // get the page id and set the insight property (create if it doesn't exist) to some string
+      const page = (await notion.pages.retrieve({
+        page_id: input.id,
+      })) as PageObjectResponse;
+
+      // get database id and create Insight property if it doesn't exist
+      const database = (await notion.databases.retrieve({
+        database_id:
+          page.parent.type === "database_id" ? page.parent.database_id : "",
+      })) as DatabaseObjectResponse;
+
+      if (!database.properties.Insight) {
+        await notion.databases.update({
+          database_id:
+            page.parent.type === "database_id" ? page.parent.database_id : "",
+          properties: {
+            Insight: {
+              type: "rich_text",
+              rich_text: {},
+            },
+          },
+        });
+      }
+
+      console.log("Page: ", JSON.stringify(page.properties));
+
+      await notion.pages.update({
+        page_id: input.id,
+        properties: {
+          Insight: {
+            type: "rich_text",
+            rich_text: [
+              {
+                type: "text",
+                text: {
+                  content: input.insight,
+                },
+              },
+            ],
+          },
+        },
+      });
+    }),
   saveJournalEntry: protectedProcedure
     .input(JournalEntry)
     .mutation(async ({ ctx, input }) => {

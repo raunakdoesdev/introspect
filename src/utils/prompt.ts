@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /** Prompt engineering utilities */
 import { Builder } from "xml2js";
 import type { Conversation } from "~/pages/compose/checkin";
+import { JournalEntryNotion } from "~/server/api/routers/journal";
 
 export type Prompt = {
   user: string;
@@ -60,5 +63,42 @@ export function summarizeJournalPrompt(conversaton: Conversation): Prompt {
     }),
     assistant: "<summary>",
     stop_sequences: ["</summary>"],
+  };
+}
+
+// recursively extract any field that is key "plain_text" and value is string and concatenate them (separated by newlines)
+function extractPlainText(data: any) {
+  let result = "";
+  if (typeof data === "object") {
+    for (const key in data) {
+      if (key === "plain_text") {
+        result += data[key] + "\n";
+      } else {
+        result += extractPlainText(data[key]);
+      }
+    }
+  } else if (Array.isArray(data)) {
+    data.forEach((item) => {
+      result += extractPlainText(item) + "\n";
+    });
+  }
+  return result;
+}
+
+/** Extract insight */
+export function extractInsightPrompt(conversaton: JournalEntryNotion): Prompt {
+  const builder = new Builder();
+  return {
+    user: builder.buildObject({
+      journal: extractPlainText(conversaton),
+      instructions: {
+        instruction:
+          "Generate a key takeway or piece of advice from the above journal entry in 1-2 sentences. It should not include any personal details from the entry but instead just be a generic insight that could be extracted from the entry.",
+        "sample-insight":
+          "It's not always possible to be the bigger person. Sometimes, you may have to prioritize your own happiness, even if it makes others upset. Each person has their own boundary for it.",
+      },
+    }),
+    assistant: "<insight>",
+    stop_sequences: ["</insight>"],
   };
 }
