@@ -29,6 +29,12 @@ export default function Home() {
         >
           <Plus className="mr-2 h-4 w-4" /> New Entry
         </Link>
+        <Link
+          className={cn(buttonVariants({ variant: "secondary" }), "w-full")}
+          href="/compose/checkin?mode=plan"
+        >
+          <Plus className="mr-2 h-4 w-4" /> New Plan
+        </Link>
         <Card>
           <CardHeader className="text-sm uppercase text-muted-foreground">
             Evening Reflection

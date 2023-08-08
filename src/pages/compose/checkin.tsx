@@ -13,6 +13,7 @@ import { Label } from "~/components/ui/label";
 import { Button } from "~/components/ui/button";
 import {
   diveDeeperPrompt,
+  helperPrompt,
   parseXMLStream,
   summarizeJournalPrompt,
 } from "~/utils/prompt";
@@ -122,7 +123,11 @@ export default function Checkin() {
                 <div className="flex flex-row justify-between">
                   <Button
                     onClick={() => {
-                      const prompt = diveDeeperPrompt(conversation);
+                      const prompt =
+                        searchParams.get("mode") === "plan"
+                          ? helperPrompt(conversation)
+                          : diveDeeperPrompt(conversation);
+
                       complete(prompt.user, {
                         body: prompt,
                       })

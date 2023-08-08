@@ -13,6 +13,11 @@ export type Prompt = {
 
 type Json = string | { [key: string]: string | Json };
 
+const builder = new Builder({
+  headless: true,
+  rootName: "instruction",
+});
+
 /** Parse XML Stream to JSON */
 export function parseXMLStream(xmlStr: string): Json {
   const result: Json = {};
@@ -34,7 +39,6 @@ export function parseXMLStream(xmlStr: string): Json {
 
 /** Prompt for diving deeper. */
 export function diveDeeperPrompt(conversaton: Conversation): Prompt {
-  const builder = new Builder();
   return {
     user: builder.buildObject({
       instruction:
@@ -46,9 +50,20 @@ export function diveDeeperPrompt(conversaton: Conversation): Prompt {
   };
 }
 
+/** Prompt for diving deeper. */
+export function helperPrompt(conversaton: Conversation): Prompt {
+  return {
+    user: builder.buildObject({
+      instruction:
+        "You are a friend, a great listener, and expert in psychology (CBT/DBT/etc.), and an expert planner. Your friend is overwhelmed with too many tasks to do. You are trying to help your friend plan out their day and prioritize tasks. You should give them suggestions for what tasks to prioritize based on due dates and relative importances. You should ask questions if you are not sure. Keep your follow up short (1-2 short sentences).",
+    }),
+    assistant: "<response>",
+    stop_sequences: ["</response>"],
+  };
+}
+
 /** Summarize journal entry */
 export function summarizeJournalPrompt(conversaton: Conversation): Prompt {
-  const builder = new Builder();
   return {
     user: builder.buildObject({
       instruction:
@@ -87,10 +102,6 @@ function extractPlainText(data: any) {
 
 /** Extract insight */
 export function extractInsightPrompt(conversaton: JournalEntryNotion): Prompt {
-  const builder = new Builder({
-    headless: true,
-    rootName: "instruction",
-  });
   return {
     user: builder.buildObject({
       journal: extractPlainText(conversaton),
