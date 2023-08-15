@@ -16,6 +16,13 @@ export const JournalInsight = z.object({
     content: z.string(),
   }),
   takeaway: z.string().optional(),
+  tags: z
+    .object({
+      people: z.array(z.string()).optional(),
+      themes: z.array(z.string()).optional(),
+      feelings: z.array(z.string()).optional(),
+    })
+    .optional(),
 });
 
 export type JournalEntry = Omit<Entry, "content" | "insight"> & {

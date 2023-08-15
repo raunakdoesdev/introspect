@@ -1,4 +1,4 @@
-import { ChevronLeft, Loader2Icon } from "lucide-react";
+import { ChevronLeft, Loader2Icon, User2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Layout from "~/components/Layout";
@@ -19,6 +19,8 @@ import {
   tagJournalPrompt,
 } from "~/utils/prompt";
 import { useRouter } from "next/router";
+import { processTagJournalOutput } from "../../utils/prompt";
+import { Badge } from "~/components/ui/badge";
 
 export const Conversation = z.array(
   z.object({
@@ -76,6 +78,10 @@ export default function Checkin() {
   const tagCompletion = useCompletion({
     api: "/api/completion",
   });
+
+  const tags = processTagJournalOutput(
+    parseXMLStream(tagCompletion.completion ?? "{}") as any
+  );
 
   const [conversationIdx, setConversationIdx] = useState(0);
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -177,9 +183,7 @@ export default function Checkin() {
                           body: summaryPrompt,
                         }),
                       ])
-                        .then(([summaryCompletion, tagCompletion]) => {
-                          console.log("Tag: ", tagCompletion);
-                          console.log("summary: ", summaryCompletion);
+                        .then(([tagCompletion, summaryCompletion]) => {
                           // saveJournal.mutate({
                           //   content: {
                           //     type: "conversation",
@@ -189,6 +193,9 @@ export default function Checkin() {
                           //     summary: parseXMLStream(
                           //       summaryCompletion!
                           //     ) as any,
+                          //     tags: processTagJournalOutput(
+                          //       parseXMLStream(tagCompletion!) as any
+                          //     ),
                           //   },
                           // });
                         })
@@ -219,6 +226,42 @@ export default function Checkin() {
               <CardContent>{summary.content}</CardContent>
             </Card>
           ) : null}
+          <div>
+            {tags.people ? (
+              <div className="flex flex-row items-center space-x-2">
+                <Label>People</Label>
+                {tags.people.map((person, idx) => (
+                  <Badge
+                    key={idx}
+                    className="flex flex-row space-x-2"
+                    variant={"secondary"}
+                  >
+                    <User2 className="mr-1 h-3 w-3" /> {person}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
+            {tags.themes ? (
+              <div className="flex flex-row items-center space-x-2">
+                <Label>Themes</Label>
+                {tags.themes.map((theme, idx) => (
+                  <Badge key={idx} variant={"secondary"}>
+                    {theme}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
+            {tags.feelings ? (
+              <div className="flex flex-row items-center space-x-2">
+                <Label>Feelings</Label>
+                {tags.feelings.map((feeling, idx) => (
+                  <Badge key={idx} variant={"secondary"}>
+                    {feeling}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
+          </div>
         </CardContent>
       </Card>
     </Layout>

@@ -86,7 +86,7 @@ export function tagJournalPrompt(conversaton: Conversation): Prompt {
   return {
     user: builder.buildObject({
       instruction:
-        "Tag the journal entry in the EXACT FORMAT of the example below (except with tags instead of example as the top level tag). Write each tag in a comma separated list. Include emojis for feelings. Don't include self or I in the list of people.",
+        "Tag the journal entry in the EXACT FORMAT of the example below (except with tags instead of example as the top level tag). Write each tag in a comma separated list. Include emojis for feelings. Don't include self or I in the list of people. Omit the tag if there are no values.",
       example: {
         people: "John,Mike,Linda",
         themes: "Work Stress,Project Deadlines,Self-belief",
@@ -100,14 +100,20 @@ export function tagJournalPrompt(conversaton: Conversation): Prompt {
 }
 
 export function processTagJournalOutput(output: {
-  people: string;
-  themes: string;
-  feelings: string;
+  people?: string;
+  themes?: string;
+  feelings?: string;
 }) {
   return {
-    people: output.people.split(",").map((x) => x.trim()),
-    themes: output.themes.split(",").map((x) => x.trim()),
-    feelings: output.feelings.split(",").map((x) => x.trim()),
+    people: output.people?.trim()
+      ? output.people.split(",").map((x) => x.trim())
+      : undefined,
+    themes: output.themes?.trim()
+      ? output.themes.split(",").map((x) => x.trim())
+      : undefined,
+    feelings: output.feelings?.trim()
+      ? output.feelings.split(",").map((x) => x.trim())
+      : undefined,
   };
 }
 
