@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { useCompletion } from "ai/react";
-import { Loader2, Wand2 } from "lucide-react";
+import { Loader2, Loader2Icon, Trash, Wand2 } from "lucide-react";
 import Link from "next/link";
 import Layout from "~/components/Layout";
 import { Button } from "~/components/ui/button";
@@ -22,7 +22,17 @@ function Entry({ entry }: { entry: JournalEntry }) {
     api: "/api/completion",
   });
 
-  const saveInsight = api.journal.saveInsight.useMutation();
+  const context = api.useContext();
+  const saveInsight = api.journal.saveInsight.useMutation({
+    onSuccess: () => {
+      context.journal.getJournalEntries.invalidate().catch(console.error);
+    },
+  });
+  const deleteEntry = api.journal.deleteEntry.useMutation({
+    onSuccess: () => {
+      context.journal.getJournalEntries.invalidate().catch(console.error);
+    },
+  });
 
   return (
     <Tabs defaultValue="summary" className="w-full">
@@ -37,17 +47,29 @@ function Entry({ entry }: { entry: JournalEntry }) {
               <span>
                 {entry.insight?.summary?.emoji} {entry?.insight.summary?.title}
               </span>
-              {entry.insight?.takeaway ? null : (
-                <Wand2
-                  className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-foreground"
-                  onClick={() => {
-                    const prompt = extractInsightPrompt(entry);
-                    complete(prompt.user, {
-                      body: prompt,
-                    }).catch(console.error);
-                  }}
-                />
-              )}
+              <div className="flex flex-row space-x-2">
+                {deleteEntry.isLoading ? (
+                  <Loader2Icon className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <Trash
+                    className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-destructive"
+                    onClick={() => {
+                      deleteEntry.mutate(entry.id);
+                    }}
+                  />
+                )}
+                {entry.insight?.takeaway ? null : (
+                  <Wand2
+                    className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-foreground"
+                    onClick={() => {
+                      const prompt = extractInsightPrompt(entry);
+                      complete(prompt.user, {
+                        body: prompt,
+                      }).catch(console.error);
+                    }}
+                  />
+                )}
+              </div>
             </div>
             <CardDescription>
               {new Date(entry.modifiedAt).toLocaleString("en-US", {

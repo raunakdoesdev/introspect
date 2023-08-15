@@ -9,8 +9,31 @@ import {
   CardHeader,
 } from "~/components/ui/card";
 import { cn } from "../lib/utils";
+import { Badge } from "~/components/ui/badge";
+import { api } from "~/utils/api";
 
 export default function Home() {
+  const entries = api.journal.getJournalEntries.useQuery();
+  const streak = entries.data?.reduce((streak, entry, index, arr) => {
+    const currentDate = new Date();
+    const entryDate = new Date(entry.createdAt);
+    const diffInDays = Math.ceil(
+      (currentDate.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (diffInDays === 1) {
+      return streak + 1;
+    } else if (diffInDays > 1 && index !== 0) {
+      const prevEntryDate = new Date(arr[index - 1]!.createdAt);
+      const diffInDaysWithPrevEntry = Math.ceil(
+        (entryDate.getTime() - prevEntryDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      if (diffInDaysWithPrevEntry === 1) {
+        return streak + 1;
+      }
+    }
+    return streak;
+  }, 0);
+
   return (
     <>
       <Layout className="flex flex-col space-y-4">
@@ -22,6 +45,17 @@ export default function Home() {
             <li>Entries</li>
           </Link>
         </ul>
+        <div className="flex flex-row justify-between">
+          <Badge>
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </Badge>
+          <Badge variant={"secondary"}>🔥 {streak} day streak </Badge>
+        </div>
         <Link
           className={cn(buttonVariants({ variant: "secondary" }), "w-full")}
           href="/compose/checkin"

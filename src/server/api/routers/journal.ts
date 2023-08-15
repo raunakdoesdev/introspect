@@ -49,6 +49,16 @@ export const journalRouter = createTRPCRouter({
         },
       });
     }),
+  deleteEntry: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      await prisma.entry.delete({
+        where: {
+          id: input,
+          userId: ctx.session.user.id,
+        },
+      });
+    }),
 
   createEntry: protectedProcedure
     .input(z.object({ content: JournalContent, insight: JournalInsight }))

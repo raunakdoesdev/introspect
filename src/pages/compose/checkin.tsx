@@ -16,6 +16,7 @@ import {
   helperPrompt,
   parseXMLStream,
   summarizeJournalPrompt,
+  tagJournalPrompt,
 } from "~/utils/prompt";
 import { useRouter } from "next/router";
 
@@ -56,7 +57,23 @@ export default function Checkin() {
 
   const numInitialQuestions = searchParams.get("mode") === "review" ? 2 : 1;
 
-  const { completion, complete, isLoading } = useCompletion({
+  const deeperCompletion = useCompletion({
+    api: "/api/completion",
+  });
+
+  const summaryCompletion = useCompletion({
+    api: "/api/completion",
+  });
+
+  const summary = summaryCompletion.isLoading
+    ? (parseXMLStream(summaryCompletion.completion) as {
+        emoji?: string;
+        title?: string;
+        content?: string;
+      })
+    : {};
+
+  const tagCompletion = useCompletion({
     api: "/api/completion",
   });
 
@@ -119,15 +136,16 @@ export default function Checkin() {
               {conversationIdx === idx &&
               item.answer &&
               idx >= numInitialQuestions - 1 &&
-              !isLoading ? (
+              !deeperCompletion.isLoading ? (
                 <div className="flex flex-row justify-between">
                   <Button
                     onClick={() => {
                       const prompt = diveDeeperPrompt(conversation);
 
-                      complete(prompt.user, {
-                        body: prompt,
-                      })
+                      deeperCompletion
+                        .complete(prompt.user, {
+                          body: prompt,
+                        })
                         .then((completion) => {
                           setConversationIdx(conversationIdx + 1);
                           setConversation([
@@ -146,20 +164,33 @@ export default function Checkin() {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      const prompt = summarizeJournalPrompt(conversation);
-                      complete(prompt.user, {
-                        body: prompt,
-                      })
-                        .then((completion) => {
-                          saveJournal.mutate({
-                            content: {
-                              type: "conversation",
-                              conversation,
-                            },
-                            insight: {
-                              summary: parseXMLStream(completion!) as any,
-                            },
-                          });
+                      const summaryPrompt =
+                        summarizeJournalPrompt(conversation);
+                      const tagPrompt = tagJournalPrompt(conversation);
+
+                      Promise.all([
+                        tagCompletion.complete(tagPrompt.user, {
+                          body: tagPrompt,
+                        }),
+
+                        summaryCompletion.complete(summaryPrompt.user, {
+                          body: summaryPrompt,
+                        }),
+                      ])
+                        .then(([summaryCompletion, tagCompletion]) => {
+                          console.log("Tag: ", tagCompletion);
+                          console.log("summary: ", summaryCompletion);
+                          // saveJournal.mutate({
+                          //   content: {
+                          //     type: "conversation",
+                          //     conversation,
+                          //   },
+                          //   insight: {
+                          //     summary: parseXMLStream(
+                          //       summaryCompletion!
+                          //     ) as any,
+                          //   },
+                          // });
                         })
                         .catch(console.error);
                     }}
@@ -174,8 +205,19 @@ export default function Checkin() {
             </>
           ))}
 
-          {isLoading ? (
-            <p className="text-sm font-light leading-5">{completion}</p>
+          {deeperCompletion.isLoading ? (
+            <p className="text-sm font-light leading-5">
+              {deeperCompletion.completion}
+            </p>
+          ) : null}
+
+          {summaryCompletion.isLoading ? (
+            <Card>
+              <CardHeader className="text-md font-medium">
+                {summary.emoji} {summary.title}
+              </CardHeader>
+              <CardContent>{summary.content}</CardContent>
+            </Card>
           ) : null}
         </CardContent>
       </Card>

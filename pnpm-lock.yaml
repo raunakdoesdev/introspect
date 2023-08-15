@@ -107,6 +107,9 @@ dependencies:
   xml2js:
     specifier: ^0.6.2
     version: 0.6.2
+  xmlai:
+    specifier: ^0.0.3
+    version: 0.0.3
   zod:
     specifier: ^3.21.4
     version: 3.21.4
@@ -5572,6 +5575,10 @@ packages:
     dependencies:
       sax: 1.2.4
       xmlbuilder: 11.0.1
+    dev: false
+
+  /xmlai@0.0.3:
+    resolution: {integrity: sha512-rDk6pCy52Qe42PO2Iqb38arNcJvynC7XV+zFChoLbzzjVY753YsGVBWJQiVcUZQylg9tSpJDGNVdcgln68d1nQ==}
     dev: false
 
   /xmlbuilder@11.0.1:
