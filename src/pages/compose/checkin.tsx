@@ -31,7 +31,7 @@ export default function Checkin() {
   const searchParams = useSearchParams();
 
   const router = useRouter();
-  const saveJournal = api.journal.saveJournalEntry.useMutation({
+  const saveJournal = api.journal.createEntry.useMutation({
     onSuccess: () => {
       router.push("/").catch(console.error);
     },
@@ -123,10 +123,7 @@ export default function Checkin() {
                 <div className="flex flex-row justify-between">
                   <Button
                     onClick={() => {
-                      const prompt =
-                        searchParams.get("mode") === "plan"
-                          ? helperPrompt(conversation)
-                          : diveDeeperPrompt(conversation);
+                      const prompt = diveDeeperPrompt(conversation);
 
                       complete(prompt.user, {
                         body: prompt,
@@ -155,9 +152,13 @@ export default function Checkin() {
                       })
                         .then((completion) => {
                           saveJournal.mutate({
-                            time: new Date().toISOString(),
-                            summary: parseXMLStream(completion!) as any,
-                            conversation,
+                            content: {
+                              type: "conversation",
+                              conversation,
+                            },
+                            insight: {
+                              summary: parseXMLStream(completion!) as any,
+                            },
                           });
                         })
                         .catch(console.error);

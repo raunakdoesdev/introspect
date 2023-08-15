@@ -1,5 +1,6 @@
-import { useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import Navbar from "~/components/Navbar";
 import { cn } from "~/lib/utils";
 
@@ -12,7 +13,13 @@ export default function Layout({
   className?: string;
   hideNav?: boolean;
 }) {
-  useSession({ required: true });
+  const router = useRouter();
+  useSession({
+    required: true,
+    onUnauthenticated: () => {
+      signIn("google", { callbackUrl: router.pathname }).catch(console.error);
+    },
+  });
   return (
     <>
       <Head>

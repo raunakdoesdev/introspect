@@ -11,6 +11,19 @@ datasource db {
     relationMode = "prisma"
 }
 
+model Entry {
+    id         String   @id @default(cuid())
+    userId     String
+    user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    content    Json
+    insight    Json
+    createdAt  DateTime @default(now())
+    modifiedAt DateTime @updatedAt
+    notionId   String?
+
+    @@index([userId])
+}
+
 // Necessary for Next auth
 model Account {
     id                     String  @id @default(cuid())
@@ -18,12 +31,12 @@ model Account {
     type                   String
     provider               String
     providerAccountId      String
-    refresh_token          String? // @db.Text
-    access_token           String? // @db.Text
+    refresh_token          String? @db.Text
+    access_token           String? @db.Text
     expires_at             Int?
     token_type             String?
     scope                  String?
-    id_token               String? // @db.Text
+    id_token               String? @db.Text
     session_state          String?
     bot_id                 String?
     workspace_name         String?
@@ -56,6 +69,7 @@ model User {
     notionDatabaseId String?
     accounts         Account[]
     sessions         Session[]
+    Entry            Entry[]
 }
 
 model VerificationToken {

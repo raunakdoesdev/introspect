@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { useCompletion } from "ai/react";
 import { Loader2, Wand2 } from "lucide-react";
 import Link from "next/link";
-import { NotionRenderer, PageIcon, Text } from "react-notion-x";
 import Layout from "~/components/Layout";
 import { Button } from "~/components/ui/button";
 import {
@@ -11,24 +11,18 @@ import {
   CardFooter,
   CardHeader,
 } from "~/components/ui/card";
-import { Checkbox } from "~/components/ui/checkbox";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { cn } from "~/lib/utils";
-import type { JournalEntryNotion } from "~/server/api/routers/journal";
+import type { JournalEntry } from "~/server/api/routers/journal";
 import { api } from "~/utils/api";
-import { useCompletion } from "ai/react";
 import { extractInsightPrompt } from "~/utils/prompt";
 
-function Entry({ entry }: { entry: JournalEntryNotion }) {
+function Entry({ entry }: { entry: JournalEntry }) {
   const { complete, completion, isLoading } = useCompletion({
     api: "/api/completion",
   });
 
-  const saveInsight = api.journal.saveEntryInsight.useMutation();
-
-  const insight =
-    entry.recordMap.raw?.page?.properties?.Insight?.rich_text[0]?.text.content;
+  const saveInsight = api.journal.saveInsight.useMutation();
 
   return (
     <Tabs defaultValue="summary" className="w-full">
@@ -41,9 +35,9 @@ function Entry({ entry }: { entry: JournalEntryNotion }) {
           <CardHeader className="text-lg font-semibold">
             <div className="flex flex-row justify-between">
               <span>
-                {entry.summary.emoji} {entry.summary.title}
+                {entry.insight?.summary?.emoji} {entry?.insight.summary?.title}
               </span>
-              {insight ?? completion ?? isLoading ? null : (
+              {entry.insight?.takeaway ? null : (
                 <Wand2
                   className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-foreground"
                   onClick={() => {
@@ -55,35 +49,37 @@ function Entry({ entry }: { entry: JournalEntryNotion }) {
                 />
               )}
             </div>
-            {entry.time ? (
-              <CardDescription>
-                {new Date(entry.time).toLocaleString("en-US", {
-                  month: "long",
-                  day: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                })}
-              </CardDescription>
-            ) : null}
+            <CardDescription>
+              {new Date(entry.modifiedAt).toLocaleString("en-US", {
+                month: "long",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            {entry.summary.content}
-            {insight ?? completion ? (
+            {entry.insight.summary.content}
+            {entry.insight.takeaway ?? completion ? (
               <Card className="mt-4">
                 <CardHeader className="font-medium">Key Insight</CardHeader>
-                <CardContent>{insight ?? completion ?? ""}</CardContent>
+                <CardContent>
+                  {entry.insight.takeaway ?? completion ?? ""}
+                </CardContent>
                 {!saveInsight.isSuccess &&
                 completion &&
-                insight !== completion &&
+                entry.insight.takeaway !== completion &&
                 !isLoading ? (
                   <CardFooter>
                     <Button
                       className="w-full"
                       onClick={() => {
-                        console.log(entry.recordMap.raw.page.id);
                         saveInsight.mutate({
-                          id: entry.recordMap.raw.page.id,
-                          insight: completion,
+                          id: entry.id,
+                          insight: {
+                            ...entry.insight,
+                            takeaway: completion,
+                          },
                         });
                       }}
                     >
@@ -102,29 +98,14 @@ function Entry({ entry }: { entry: JournalEntryNotion }) {
       <TabsContent value="entry">
         <Card>
           <CardHeader className="flex flex-col space-y-2 whitespace-pre-line">
-            <NotionRenderer
-              recordMap={entry.recordMap}
-              components={{
-                Checkbox: ({ isChecked }) => <Checkbox checked={isChecked} />,
-                Callout: ({ blockId, block }: { blockId: any; block: any }) =>
-                  block.format.page_icon === "🤖" ? null : (
-                    <div
-                      className={cn(
-                        "notion-callout",
-                        block.format?.block_color &&
-                          `notion-${block.format?.block_color}_co`,
-                        blockId
-                      )}
-                    >
-                      <PageIcon block={block} />
-
-                      <div className="notion-callout-text">
-                        <Text value={block.properties?.title} block={block} />
-                      </div>
-                    </div>
-                  ),
-              }}
-            />
+            {entry.content.conversation.map((pair, idx) => (
+              <div key={idx}>
+                <h3 className="font-light leading-tight text-muted-foreground">
+                  {pair.question}
+                </h3>
+                <p>{pair.answer!}</p>
+              </div>
+            ))}
           </CardHeader>
         </Card>
       </TabsContent>
@@ -145,9 +126,7 @@ export default function Entries() {
           </li>
         </ul>
         {entries.data ? (
-          entries.data
-            ?.filter((data) => data)
-            .map((data, idx) => <Entry entry={data!} key={idx} />)
+          entries.data.map((data, idx) => <Entry entry={data} key={idx} />)
         ) : (
           <div className="flex w-full flex-col space-y-4">
             <div className="flex w-full flex-col space-y-2">

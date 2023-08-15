@@ -67,7 +67,7 @@ export function summarizeJournalPrompt(conversaton: Conversation): Prompt {
   return {
     user: builder.buildObject({
       instruction:
-        "Summarize the journal entry below in 4-5 sentences (the answers not the questions). Answer in the EXACT FORMAT of the example below (except with summary instead of example as the top level tag).",
+        "Summarize the journal entry below in 4-5 sentences (the answers not the questions). Answer in the EXACT FORMAT of the example below (except with summary instead of example as the top level tag). Remember to write in third person rather than first person.",
       example: {
         emoji: "🏖️",
         title: "A day at the beach",

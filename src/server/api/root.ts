@@ -1,4 +1,5 @@
 import { journalRouter } from "~/server/api/routers/journal";
+import { notionRouter } from "~/server/api/routers/notion";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +9,7 @@ import { createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   journal: journalRouter,
+  notion: notionRouter,
 });
 
 // export type definition of API

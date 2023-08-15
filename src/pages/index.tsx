@@ -1,8 +1,7 @@
 import { ArrowRight, Plus } from "lucide-react";
-import Head from "next/head";
 import Link from "next/link";
 import Layout from "~/components/Layout";
-import { Button, buttonVariants } from "~/components/ui/button";
+import { buttonVariants } from "~/components/ui/button";
 import {
   Card,
   CardContent,
@@ -28,12 +27,6 @@ export default function Home() {
           href="/compose/checkin"
         >
           <Plus className="mr-2 h-4 w-4" /> New Entry
-        </Link>
-        <Link
-          className={cn(buttonVariants({ variant: "secondary" }), "w-full")}
-          href="/compose/checkin?mode=plan"
-        >
-          <Plus className="mr-2 h-4 w-4" /> New Plan
         </Link>
         <Card>
           <CardHeader className="text-sm uppercase text-muted-foreground">
